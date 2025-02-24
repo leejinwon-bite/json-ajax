@@ -21,7 +21,7 @@ public class ReplyDTO {
     private Long bno;
 
     @NotEmpty
-    private String replyTest;
+    private String replyText;
 
     @NotEmpty
     private String replyer;
