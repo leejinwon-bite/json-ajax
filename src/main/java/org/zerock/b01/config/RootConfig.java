@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RootConfig {
 
+    // configcxvxccx
+
     @Bean
     public ModelMapper getMapper() {
         ModelMapper modelMapper = new ModelMapper();
