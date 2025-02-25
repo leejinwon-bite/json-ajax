@@ -49,9 +49,29 @@ public class ReplyServiceImpl implements ReplyService {
 
     @Override
     public ReplyDTO read(Long rno) {
-        Optional<Reply> replyOptional = replyRepository.findById(rno);
 
+        Optional<Reply> replyOptional = replyRepository.findById(rno);
+        // board_bno 자체를 출력 안함. 아마 Entity에서 필드의 자료형이 Board라서 그런가봄ㅋㅋㅋ.
+//        애초에 board_bno가 fk 가 되니까, 자료형은 무조건 Board로 해야하는것 같음.
+//        아마도 left join 쿼리 메서드를 사용하면, 테이블을 2개를 다루니깐 나올수도 잇을 것 같음.
+//        DB에는 조인도 되고, reply 테이블 조회해도 나옴. 아마도 자바쪽에서 자료형 문제일것 같음.
+//        queryDSL이 자바를 사용하기 때문에 쪼여주는 아주 조여주는 조여정 같음.
+//        Optional<Reply> replyOptional = replyRepository.findById(rno); 조회하는 쿼리 메서드의 자료형이 Reply
+//        board_bno의 자료형은 Board.
         Reply reply = replyOptional.orElseThrow();
+
+        log.info(reply);
+
+//        reply의 자료형을 Board로 바꿔준 값 =
+//        Board(bno=null, title=null, content=null, writer=null). 여기에 board_bno, bno가 null이거나 없음.
+//        개노답임.
+        Board board = modelMapper.map(reply,Board.class);
+
+        log.info(board);
+
+        ReplyDTO dto = modelMapper.map(reply, ReplyDTO.class);
+
+        log.info(dto);
 
         return modelMapper.map(reply, ReplyDTO.class);
     }
@@ -79,11 +99,8 @@ public class ReplyServiceImpl implements ReplyService {
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() <=0? 0:
                 pageRequestDTO.getPage() -1, pageRequestDTO.getSize(), Sort.by("rno").ascending());
 
-        Board bno2 = Board.builder()
-                .bno(bno)
-                .build();
 
-        Page<Reply> result = replyRepository.listOfBoard(bno2.getBno(), pageable);
+        Page<Reply> result = replyRepository.listOfBoard(bno, pageable);
 
         List<ReplyDTO> dtoList = result.getContent().stream().map(reply-> modelMapper.map(reply,ReplyDTO.class))
                 .collect(Collectors.toList());

@@ -47,8 +47,13 @@ public class PageResponseDTO<E> {
 
         this.end =  end > last ? last: end;
 
+//        1 페이지가 아니면 true, 1페이지 랑 같거나 작으면?(그럴릴 거의 없음) false.
         this.prev = this.start > 1;
 
+//        total은 getTotalElements를 의미하는 것 같음. end는 View page 보이는 페이지 번호의 마지막 번호 인것 같음
+//        11페이지 있고 10 페이지씩 페이지 번호 보이게 하면 10이 end임. size는 한 페이지당 list 촤대 갯수 말함.
+//        10*10=100, 11페이지에 1개의 레코드가 있으면 101>100=true가 됨. next 버튼이 생김/ 만약 맨 마지막 페이지가
+//        9이고, size가 10이면 90이 됨. total은 90이라 false가 됨/
         this.next =  total > this.end * this.size;
 
     }

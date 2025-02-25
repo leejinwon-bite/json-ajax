@@ -72,4 +72,19 @@ public class ReplyController {
 
         return resultMap;
     }
+
+//    이거 board_bno 값은 역시나 안바뀜, 이것도 자바쪽 자료형 문제인듯.
+    @PutMapping("/{rno}")
+    public Map<String, Long> remove(@PathVariable("rno") Long rno, @RequestBody ReplyDTO replyDTO) {
+
+        replyDTO.setRno(rno);
+
+        replyService.modify(replyDTO);
+
+        Map<String ,Long> resultMap = new HashMap<>();
+
+        resultMap.put("rno", rno);
+
+        return resultMap;
+    }
 }
