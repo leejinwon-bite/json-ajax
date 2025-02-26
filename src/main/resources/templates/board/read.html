@@ -56,34 +56,81 @@
 
 
                 </div><!--end card body-->
-
-
-
             </div><!--end card-->
         </div><!-- end col-->
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/js/reply.js"></script>
 
     <div class="row mt-3">
         <div class="col-md-12">
             <div class="my-4">
                 <button class="btn btn-info addReplyBtn">ADD REPLY</button>
             </div>
-            <ul class="list-group replyList">
-            </ul>
+<!--            밑에 자리가 댓글 목록 자리임.-->
+            <ul class="list-group replyList"></ul>
         </div>
     </div>
     <div class="row mt-3">
         <div class="col">
+<!--            밑에 자리가 댓글 페이지 숫자 자판기 누르는거 클릭 자리임.-->
             <ul class="pagination replyPaging"></ul>
         </div>
     </div>
+
+<!-- 댓글 등록 modal-->
+<!--    class = "registerModal" 이것은 이벤트 처리를 위해 기존의 bootstrap에서 copy한 code에서 추가한 부분이다.-->
+    <div class="modal registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register Reply</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Reply Text</span>
+                        <input type="text" class="form-control replyText">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Replyer</span>
+                        <input type="text" class="form-control replyer">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary registerBtn">Register</button>
+                    <button type="button" class="btn btn-outline-dark closeRegisterBtn">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!--  댓글 조회 Modal  -->
+    <div class="modal modifyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title replyHeader"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Reply Text</span>
+                        <input type="text" class="form-control replyText">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary modifyBtn">Modify</button>
+                    <button type="button" class="btn btn-danger removeBtn">Remove</button>
+                    <button type="button" class="btn btn-outline-dark closeModifyBtn">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/reply.js"></script>
 </div><!-- end row-->
-
-
-
 
 <script layout:fragment="script" th:inline="javascript">
 
@@ -145,7 +192,24 @@
         })
     }
 
+<!--처음 댓글 목록 링크 누를때 적용되는 요청 json의 값-->
     printReplies(1,10, true)
+
+<!--modal-->
+<!--오류 원인이 ) 하나 빼먹어서임/ VsCode에서는 에러가 뜨는데, 망할 intelliJ 에서는 안뜬다.-->
+<!--new bootstrap.Modal 빼먹으면 모달창이 안나온다. -->
+   const registerModal = new bootstrap.Modal(document.querySelector(".registerModal"))
+   const registerBtn = document.querySelector(".registerBtn")
+   const replyText = document.querySelector(".replyText")
+   const replyer = document.querySelector(".replyer")
+   const closeRegisterBtn = document.querySelector(".closeRegisterBtn")
+
+   document.querySelector(".addReplyBtn").addEventListener("click", function(e){
+       registerModal.show()
+   }, false)
+   closeRegisterBtn.addEventListener("click", function(e) {
+      registerModal.hide()
+   }, false)
 
 <!--    get1(bno).then(data => {-->
 <!--        console.log(data)-->
@@ -156,6 +220,48 @@
 
 <!--    console.log(get1(bno))-->
 
+    registerBtn.addEventListener("click", function(e){
+        const replyObj = {
+            bno : bno,
+            replyText : replyText.value,
+            replyer : replyer.value
+        }
+
+        addReply(replyObj).then(result => {
+            alert(result.rno)
+            registerModal.hide()
+            replyText.value = ''
+            replyer.value = ''
+            printReplies(1,10,true)
+        }).catch(e => {
+            alert("Exception")
+        })
+    }, false)
+
+<!--    댓글 페이지 번호 클릭-->
+<!-- 밑애 page, size가 페이지 번호를 제어하는 애들임. 얘내를 바꾸면 페이지 번호 누를때 size가 적용됨.-->
+<!--page는 PageRequestDTO의 초기값으로 맞춰 놧는데, 서로 값이 다를경우 data-page 으로 계산이 되어 나타남.-->
+    let page = 1
+    let size = 10
+
+    replyPaging.addEventListener("click", function(e) {
+
+        e.preventDefault()
+        e.stopPropagation()
+
+        const target = e.target
+
+<!--얘의 용도는 ul태그가 길게 늘어져서 누르면 이벤트가 발생하는데, ul태그에는 data-page 속성이 없어서 null값 반환함-->
+<!--null값을 반환 받으면 PageResponseDTO 값이 나오는데, 초기값은 PageRequestDTO에서 page=1이라서 항상 1로 이동함-->
+        if(!target || target.tagName != 'A') {
+            return
+        }
+
+        const pageNum = target.getAttribute("data-page")
+
+        page=pageNum
+        printReplies(page,size)
+    }, false)
 </script>
 
 
