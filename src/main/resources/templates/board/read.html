@@ -5,6 +5,8 @@
 
 <head>
     <title>Board Read</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/reply.js"></script>
 </head>
 
 <div layout:fragment="content">
@@ -73,6 +75,7 @@
         <div class="col">
 <!--            밑에 자리가 댓글 페이지 숫자 자판기 누르는거 클릭 자리임.-->
             <ul class="pagination replyPaging"></ul>
+<!--            <ul class="pagination replyPaging" data-page=""></ul>-->
         </div>
     </div>
 
@@ -109,6 +112,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
+<!--                    밑에가 rno 적히는 부분임.-->
                     <h5 class="modal-title replyHeader"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
@@ -116,7 +120,7 @@
                 <div class="modal-body">
                     <div class="input-group mb-3">
                         <span class="input-group-text">Reply Text</span>
-                        <input type="text" class="form-control replyText">
+                        <input type="text" class="form-control modifyText">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -128,8 +132,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/js/reply.js"></script>
+
 </div><!-- end row-->
 
 <script layout:fragment="script" th:inline="javascript">
@@ -251,10 +254,26 @@
 
         const target = e.target
 
-<!--얘의 용도는 ul태그가 길게 늘어져서 누르면 이벤트가 발생하는데, ul태그에는 data-page 속성이 없어서 null값 반환함-->
-<!--null값을 반환 받으면 PageResponseDTO 값이 나오는데, 초기값은 PageRequestDTO에서 page=1이라서 항상 1로 이동함-->
+<!--얘의 용도는 ul태그가 길게 늘어져서 누르면 이벤트가 발생하는데, ul태그에는 data-page 속성이 없음.-->
+<!--undefined가 나오면 종료. PageResponseDTO 값이 나오는데, 초기값은 PageRequestDTO에서 page=1이라서 항상 1로 이동함-->
+<!--return 값에 null, undefined 넣어보니까 잘 됨. return 문에 표현식이 없는 경우, 함수는 undefined를 반환합니다.-->
+<!-- null, undefined 반환시 아무 page 값을 반환한게 아니라서, page값이 안나옴. -->
+<!--??? return문에 표현식이 없으면 page=1로 가짐. return문이 없으면 undefined 반환 안함-->
+<!--1을 return 해도, 잘됨. 한글 입력해도 잘됨.-->
+<!--이유는 C에서 넘어오는 값을 page에 대응해서 인식하지 못하기 때문임.-->
         if(!target || target.tagName != 'A') {
-            return
+<!--        printReplies(2,5)-->
+
+<!--            e.target.getAttribute("data-page")-->
+<!--            e.target.setAttribute("data-page", -7)-->
+
+<!--            const pageNum = target.getAttribute("data-page")-->
+
+<!--            page=pageNum-->
+<!--            printReplies(page,size)-->
+
+<!--                return 하앍-->
+                    return
         }
 
         const pageNum = target.getAttribute("data-page")
@@ -262,6 +281,85 @@
         page=pageNum
         printReplies(page,size)
     }, false)
+
+<!--    modifyModal-->
+
+    const modifyModal = new bootstrap.Modal(document.querySelector(".modifyModal"))
+
+    const replyHeader = document.querySelector(".replyHeader")
+    const modifyText = document.querySelector(".modifyText")
+    const modifyBtn = document.querySelector(".modifyBtn")
+    const removeBtn = document.querySelector(".removeBtn")
+    const closeModifyBtn = document.querySelector(".closeModifyBtn")
+
+    replyList.addEventListener("click", function (e){
+
+        e.preventDefault()
+        e.stopPropagation()
+
+        const target = e.target
+
+        if(!target || target.tagName != 'SPAN') {
+            return
+        }
+
+        const rno = target.getAttribute("data-rno")
+
+        if(!rno) {
+            return
+        }
+
+        getReply(rno).then(reply => {
+            console.log(reply)
+            replyHeader.innerHTML = reply.rno
+            modifyText.value = reply.replyText
+            modifyModal.show()
+        }).catch(e => alert('error'))
+    },false)
+
+<!--    수정 이벤트 처리-->
+    modifyBtn.addEventListener("click", function(e) {
+
+        const replyObj = {
+            bno : bno,
+            rno : replyHeader.innerHTML,
+            replyText : modifyText.value
+        }
+
+
+
+        modifyReply(replyObj).then(data => {
+            alert(data.rno + ' 댓글이 수정 되었습니다.')
+            replyText.value = ''
+            modifyModal.hide()
+            printReplies(page,size)
+        }).catch(e => {
+            console.log(e)
+        })
+    },false)
+
+    closeModifyBtn.addEventListener("click", function(e) {
+        modifyModal.hide()
+    },false)
+
+<!--    삭제 이벤트 처리-->
+    removeBtn.addEventListener("click", function(e){
+
+        removeReply(replyHeader.innerHTML).then(result => {
+            alert(result.rno + ' 댓글이 삭제되었습니다.')
+            replyText.value = ''
+            modifyModal.hide()
+
+<!--삭제후 원래 페이지로 이동시키는 코드임-->
+            page = 1
+            printReplies(page, size)
+
+            console.log("e란? "+e+"이란다.")
+        }).catch(e => {
+            console.log(e)
+        })
+    },false)
+
 </script>
 
 

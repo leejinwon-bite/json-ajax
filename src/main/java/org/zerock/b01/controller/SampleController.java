@@ -18,11 +18,13 @@ import java.util.stream.IntStream;
 public class SampleController {
 
     @GetMapping("/hello")
-    public void hello(Model model) {
+    public String hello(Model model) {
 
         log.info("hello................");
 
         model.addAttribute("msg", "HELLO WORLD");
+
+        return "hello";
     }
 
     @GetMapping("/ex/ex1")
