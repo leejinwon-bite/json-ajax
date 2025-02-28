@@ -33,14 +33,20 @@ public class PageResponseDTO<E> {
             return;
         }
 
+//        this.page = pageRequestDTO.getPage(); = 1
         this.page = pageRequestDTO.getPage();
         this.size = pageRequestDTO.getSize();
 
         this.total = total;
         this.dtoList = dtoList;
 
+//    console.log("endNum, 페이지 끝 번호: "+endNum+" = 전체 페이지 갯수를 나누는 숫자는 Math.ceil(pageNum/n)*m 에서 m임");
+//    console.log("1 페이지당 나열되는 페이지 번호. 다음 페이지는 번호는 누적됨."+endNum); (진원이의 라이브러리 참조)
         this.end =   (int)(Math.ceil(this.page / 10.0 )) *  10;
 
+//   console.log("startNum, 페이지 첫번째 번호: "+startNum+" = var startNum = endNum-m-1;에서 m-1을
+//   위하고 맞춰줘야 첫 페이지가 1 이됨.");
+//   위는 var endNum = Math.ceil(pageNum/10)*8;
         this.start = this.end - 9;
 
         int last =  (int)(Math.ceil((total/(double)size)));

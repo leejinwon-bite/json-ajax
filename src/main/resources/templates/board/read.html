@@ -196,7 +196,10 @@
     }
 
 <!--처음 댓글 목록 링크 누를때 적용되는 요청 json의 값-->
-    printReplies(1,10, true)
+        printReplies(1,10, true)
+
+
+
 
 <!--modal-->
 <!--오류 원인이 ) 하나 빼먹어서임/ VsCode에서는 에러가 뜨는데, 망할 intelliJ 에서는 안뜬다.-->
@@ -325,8 +328,6 @@
             rno : replyHeader.innerHTML,
             replyText : modifyText.value
         }
-
-
 
         modifyReply(replyObj).then(data => {
             alert(data.rno + ' 댓글이 수정 되었습니다.')
